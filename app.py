@@ -51,8 +51,8 @@ app = dash.Dash(
     title="Cellar",
     suppress_callback_exceptions=True,
     # routes_pathname_prefix=routes_pathname_prefix,
-    routes_pathname_prefix='/olala/',
+    routes_pathname_prefix='/cellar2/',
     # requests_pathname_prefix=requests_pathname_prefix,
-    requests_pathname_prefix='/olala/',
+    requests_pathname_prefix='/cellar2/',
     )
 logger = setup_logger('Cellar')
