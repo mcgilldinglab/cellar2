@@ -3,7 +3,7 @@ LABEL author="ehasanaj@cs.cmu.edu"
 
 RUN mkdir /home/nonroot/cellar
 ARG VER=unknown
-RUN git clone https://github.com/euxhenh/cellar /home/nonroot/cellar
+COPY . /home/nonroot/cellar
 
 WORKDIR /home/nonroot/cellar
 EXPOSE 8050

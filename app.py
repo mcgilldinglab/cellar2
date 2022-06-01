@@ -50,7 +50,9 @@ app = dash.Dash(
     external_stylesheets=external_stylesheets,
     title="Cellar",
     suppress_callback_exceptions=True,
-    routes_pathname_prefix=routes_pathname_prefix,
-    requests_pathname_prefix=requests_pathname_prefix,
+    # routes_pathname_prefix=routes_pathname_prefix,
+    routes_pathname_prefix='/olala/',
+    # requests_pathname_prefix=requests_pathname_prefix,
+    requests_pathname_prefix='/olala/',
     )
 logger = setup_logger('Cellar')
