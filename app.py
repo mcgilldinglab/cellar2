@@ -33,26 +33,12 @@ external_stylesheets = [
     }
 ]
 
-"""
-Dash requires the knowledge of the path used to access the app.
-ShinyProxy makes this path available as an environment variable,
-which we expose to dash below.
-"""
-if 'SHINYPROXY_PUBLIC_PATH' in os.environ:
-    routes_pathname_prefix = os.environ['SHINYPROXY_PUBLIC_PATH']
-    requests_pathname_prefix = os.environ['SHINYPROXY_PUBLIC_PATH']
-else:
-    routes_pathname_prefix = None
-    requests_pathname_prefix = None
-
 app = dash.Dash(
     __name__,
     external_stylesheets=external_stylesheets,
-    title="Cellar",
+    title="Cellar2",
     suppress_callback_exceptions=True,
-    # routes_pathname_prefix=routes_pathname_prefix,
     routes_pathname_prefix='/cellar2/',
-    # requests_pathname_prefix=requests_pathname_prefix,
     requests_pathname_prefix='/cellar2/',
     )
 logger = setup_logger('Cellar')

@@ -4,3 +4,8 @@ tmp
 PaperImages
 __pycache__
 docs
+!data/uploaded
+!data/codex_tile
+!data/ASCT-B_tables
+!data/geneIdsNamesHuman.csv
+!data/geneIdsNamesMouse.csv

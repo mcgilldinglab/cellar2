@@ -9,7 +9,6 @@ tmp/*
 *.h5
 Enrichr
 notebooks
-shinyproxy
 data/server/*
 !data/uploaded
 !data/codex_tile
