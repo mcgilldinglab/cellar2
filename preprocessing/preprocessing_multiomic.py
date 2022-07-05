@@ -100,13 +100,14 @@ class Preprocessor():
             adata.var_names_make_unique()
             adata.var["mt"] = adata.var_names.str.startswith("MT-")
             sc.pp.calculate_qc_metrics(adata, qc_vars=["mt"], inplace=True)
-            sc.pp.filter_cells(adata, min_counts=5000)
-            sc.pp.filter_cells(adata, max_counts=35000)
-            adata = adata[adata.obs["pct_counts_mt"] < 20]
-            sc.pp.filter_genes(adata, min_cells=10)
+            sc.pp.filter_cells(adata, min_counts=int(input("Please enter the minimum count value for filtering: ")))
+            sc.pp.filter_cells(adata, max_counts=int(input("Please enter the maximum count value for filtering: ")))
+            
+            adata = adata[adata.obs["pct_counts_mt"] < int(input("Please enter the minimum percentage of mitochondrial genes expressed for filtering: "))]
+            sc.pp.filter_genes(adata, min_cells=int(input("Please enter the minimum number of cells the gene is detected in for filtering: ")))
             sc.pp.normalize_total(adata, inplace=True)
             sc.pp.log1p(adata)
-            sc.pp.highly_variable_genes(adata, flavor="seurat", n_top_genes=2000)
+            sc.pp.highly_variable_genes(adata, flavor="seurat", n_top_genes=int(input("Please enter the number of top genes to be considered in filtering: ")))
             # TODO: Change output file name
             adata.write(f'/mnt/data/cellar/preprocessed/{self.base_dir}.h5ad')
             
