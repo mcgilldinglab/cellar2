@@ -4,6 +4,8 @@ LABEL author="ehasanaj@cs.cmu.edu"
 RUN mkdir /home/nonroot/cellar
 ARG VER=unknown
 COPY . /home/nonroot/cellar
+RUN sudo chown nonroot:nonroot /home/nonroot/cellar/data/uploaded
+RUN sudo chown nonroot:nonroot /home/nonroot/cellar/tmp
 
 WORKDIR /home/nonroot/cellar
 EXPOSE 8050

@@ -7,9 +7,9 @@ from controller.cellar.utils.exceptions import IncorrectFileFormat
 from controller.cellar.utils.misc import is_sparse
 
 
-def read_adata(path, mode='r'):
+def read_adata(path):
     try:
-        return anndata.read_h5ad(path, mode)
+        return anndata.read_h5ad(path)
     except Exception as e:
         logger.info(str(e))
         raise IncorrectFileFormat
