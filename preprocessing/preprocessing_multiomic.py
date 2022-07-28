@@ -3,6 +3,11 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 
+import csv
+import gzip
+import os
+import scipy.io
+
 
 class Preprocessor():
     def __init__(self, raw: str, mode: str) -> None:
@@ -11,7 +16,7 @@ class Preprocessor():
         self.mode = mode
         self.matrix = None
 
-    def count(self, ref_dir: str, probe_dir: str=None, image_dir: str=None, lib_dir: str=None) -> None:
+    def count(self, ref_dir: str, probe_dir: str=None, image_dir: str=None, lib_dir: str=None, gex_dir: str=None, atac_dir: str=None) -> None:
         # Working directory is /mnt/data/cellar
         # User uploaded raw fastq data sits in /data/raw
         # Prepared reference data sits in /data/ref
@@ -51,20 +56,62 @@ class Preprocessor():
                 f'--area=A1'], check=True, capture_output=True)
                 self.matrix = f'/mnt/data/cellar/output_{self.base_dir}/outs/filtered_feature_bc_matrix/'
 
-            elif self.mode == 'multi':
+            elif self.mode == 'multi-sep' or self.mode == 'multi':
                 subprocess.run(['cellranger-arc', 'count', f'--id=output_{self.base_dir}',
                 f'--reference={ref_dir}',
                 f'--libraries={lib_dir}'], check=True, capture_output=True)
                 self.matrix = f'/mnt/data/cellar/output_{self.base_dir}/outs/filtered_feature_bc_matrix/'
-                
+
         except subprocess.CalledProcessError as e:
             print(f'Cannot run count pipeline, error:\n {e.stderr}')
             raise e
         subprocess.run(['rm', '-rf', tmp_location])
 
+    def split_index(self, features_path: str):
+        #find where gex ends and peaks begin
+        feature_types = [row[2] for row in csv.reader(gzip.open(features_path,'rt',encoding='utf8'), delimiter="\t")]
+        i = feature_types.index('Peaks')
+
+        #return first peaks index
+        return i
+
     def read(self):
         if self.matrix is None:
             raise ValueError('Matrix is not initialized')
+
+        adata = sc.read_10x_mtx(
+            self.matrix,                             # the directory with the `.mtx` file
+            var_names='gene_symbols',                # use gene symbols for the variable names (variables-axis index)
+            gex_only=False,                          # include all data                        
+            cache=True)                              # write a cache file for faster subsequent reading
+
+        if self.mode == 'multi-sep':   
+            #split matrix
+            ind = self.split_index(f'/mnt/data/cellar/output_{self.base_dir}/outs/filtered_feature_bc_matrix/features.tsv.gz')
+            gex_adata = adata[:,:ind]
+            atac_adata = adata[:,ind:]
+
+            #convert gex and atac matrix into separate h5ad files
+            gex_adata.write(f'/mnt/data/cellar/preprocessed/gex_{self.base_dir}.h5ad')
+            atac_adata.write(f'/mnt/data/cellar/preprocessed/atac_{self.base_dir}.h5ad')
+
+        elif self.mode == 'multi':
+            adata.var_names_make_unique()
+            adata.var["mt"] = adata.var_names.str.startswith("MT-")
+            sc.pp.calculate_qc_metrics(adata, qc_vars=["mt"], inplace=True)
+            sc.pp.filter_cells(adata, min_counts=5000)
+            sc.pp.filter_cells(adata, max_counts=35000)
+            adata = adata[adata.obs["pct_counts_mt"] < 20]
+            sc.pp.filter_genes(adata, min_cells=10)
+            sc.pp.normalize_total(adata, inplace=True)
+            sc.pp.log1p(adata)
+            sc.pp.highly_variable_genes(adata, flavor="seurat", n_top_genes=2000)
+            # TODO: Change output file name
+            adata.write(f'/mnt/data/cellar/preprocessed/{self.base_dir}.h5ad')
+
+            
+            
+ 
         adata = sc.read_10x_mtx(
             self.matrix,                             # the directory with the `.mtx` file
             var_names='gene_symbols',                # use gene symbols for the variable names (variables-axis index)
@@ -82,6 +129,7 @@ class Preprocessor():
             adata = adata[:, adata.var.highly_variable]
             sc.pp.scale(adata, max_value=10)
             adata.write(f'/mnt/data/cellar/preprocessed/{self.base_dir}.h5ad')
+            
         elif self.mode == 'spatial_ffpe' or self.mode == 'spatial_ff':
             adata.var_names_make_unique()
             adata.var["mt"] = adata.var_names.str.startswith("MT-")
@@ -96,21 +144,7 @@ class Preprocessor():
             # TODO: Change output file name
             adata.write(f'/mnt/data/cellar/preprocessed/{self.base_dir}.h5ad')
 
-        elif self.mode == 'multi':
-            adata.var_names_make_unique()
-            adata.var["mt"] = adata.var_names.str.startswith("MT-")
-            sc.pp.calculate_qc_metrics(adata, qc_vars=["mt"], inplace=True)
-            sc.pp.filter_cells(adata, min_counts=int(input("Please enter the minimum count value for filtering: ")))
-            sc.pp.filter_cells(adata, max_counts=int(input("Please enter the maximum count value for filtering: ")))
-            
-            adata = adata[adata.obs["pct_counts_mt"] < int(input("Please enter the minimum percentage of mitochondrial genes expressed for filtering: "))]
-            sc.pp.filter_genes(adata, min_cells=int(input("Please enter the minimum number of cells the gene is detected in for filtering: ")))
-            sc.pp.normalize_total(adata, inplace=True)
-            sc.pp.log1p(adata)
-            sc.pp.highly_variable_genes(adata, flavor="seurat", n_top_genes=int(input("Please enter the number of top genes to be considered in filtering: ")))
-            # TODO: Change output file name
-            adata.write(f'/mnt/data/cellar/preprocessed/{self.base_dir}.h5ad')
-            
+        
         elif self.mode == 'codex':
             pass
 
@@ -120,4 +154,7 @@ preprocessor = Preprocessor(raw='/mnt/data/cellar/data/raw/pbmc_granulocyte_sort
 # TODO: Choose reference data to use according to the kind of raw data
 preprocessor.count(ref_dir='/mnt/data/cellar/data/ref/refdata-cellranger-arc-atac-human',
                    lib_dir='/mnt/data/cellar/data/raw/pbmc_granulocyte_sorted_3k_library.csv')
+
 preprocessor.read()
+
+
