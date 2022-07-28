@@ -29,7 +29,7 @@ class Preprocessor():
                 subprocess.run(['cellranger', 'count', f'--id=output_{self.base_dir}',
                 f'--fastqs={tmp_location}/{self.base_dir}',
                 # TODO: Implement sample selection with "--sample"
-                f'--transcriptome={ref_dir}'], check=True, capture_output=True)
+                f'--transcriptome={ref_dir}'], check=True)
                 self.matrix = f'/mnt/data/cellar/output_{self.base_dir}/outs/filtered_feature_bc_matrix/'
             elif self.mode == 'spatial_ffpe':
                 subprocess.run(['spaceranger', 'count', f'--id=output_{self.base_dir}',
@@ -48,7 +48,7 @@ class Preprocessor():
                 f'--image={image_dir}',
                 # TODO: Find a way to get `slide` and `area` either from the raw data or from the user input
                 f'--slide=V10N30-322',
-                f'--area=A1'], check=True, capture_output=True)
+                f'--area=A1'], check=True)
                 self.matrix = f'/mnt/data/cellar/output_{self.base_dir}/outs/filtered_feature_bc_matrix/'
         except subprocess.CalledProcessError as e:
             print(f'Cannot run count pipeline, error:\n {e.stderr}')
@@ -93,9 +93,14 @@ class Preprocessor():
 
 
 
-preprocessor = Preprocessor(raw='/mnt/data/cellar/data/raw/Visium_FFPE_Human_Intestinal_Cancer_fastqs.tar', mode='spatial_ffpe')
+#preprocessor = Preprocessor(raw='/mnt/data/cellar/data/raw/Visium_FFPE_Human_Intestinal_Cancer_fastqs.tar', mode='spatial_ffpe')
+preprocessor = Preprocessor(raw='/mnt/data/cellar/data/raw/Adult_Mouse_Olfactory_Bulb/Visium_Mouse_Olfactory_Bulb_fastqs.tar', mode='spatial_ff')
 # TODO: Choose reference data to use according to the kind of raw data
+'''
 preprocessor.count(ref_dir='/mnt/data/cellar/data/ref/refdata-cellranger-spaceranger-human',
                    probe_dir='/mnt/data/cellar/data/raw/Visium_FFPE_Human_Intestinal_Cancer_probe_set.csv',
                    image_dir='/mnt/data/cellar/data/raw/Visium_FFPE_Human_Intestinal_Cancer_image.jpg',)
+'''
+preprocessor.count(ref_dir='/mnt/data/cellar/data/ref/refdata-cellranger-spaceranger-mouse',
+                   image_dir='/mnt/data/cellar/data/raw/Adult_Mouse_Olfactory_Bulb/Visium_Mouse_Olfactory_Bulb_image.tif',)
 preprocessor.read()
