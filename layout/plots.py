@@ -156,7 +156,12 @@ def get_plot_download_popover(prefix):
 
 
 def get_plot(prefix):
-    title = "PLOT" if prefix == 'main' else "PLOT 2"
+    if prefix == 'main':
+        title = "Main Plot"
+    if prefix == 'co-analysis':
+        title = "Co-Analysis Plot"
+    if prefix == 'side':
+        title = 'Secondary Plot'
 
     plot = dbc.Card(
         [
@@ -256,14 +261,24 @@ plots = dbc.Row(
         dbc.Col(
             get_plot("main"),
             md=12, lg=12,
-            id="main-plot-col"
+            # md=6, lg=6,
+            id="main-plot-col",
+            className="block-display"
         ),
         dbc.Col(
             get_plot("side"),
             md=0, lg=0,
             id="side-plot-col",
             className="no-display"
-        )
+        ),
+        #dbc.Col(
+        #    get_plot("co-analysis"),
+        #    md=6, lg=6,
+        #    id="co-plot-col",
+        #    className="block-display"
+        #),
+        # html.Div(id='selected-data', style={'border': 'thin lightgrey solid', 'overflowX': 'scroll'})
+        html.Div(id='selected-data')
     ],
     className="mb-5 g-0",
 )

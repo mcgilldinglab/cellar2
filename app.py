@@ -19,6 +19,7 @@ dbroot.MULTIPLEXER_OUTPUTS = BTrees.OOBTree.BTree()
 dbroot.notifications = BTrees.OOBTree.BTree()
 dbroot.palettes = BTrees.OOBTree.BTree()
 dbroot.palettes['main'] = PALETTE.copy()
+dbroot.palettes['co-analysis'] = PALETTE.copy()
 dbroot.palettes['side'] = PALETTE.copy()
 
 # Bootstrap theme

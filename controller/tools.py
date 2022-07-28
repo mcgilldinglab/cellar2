@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 import dash
 from dash.dependencies import Input, Output, State
@@ -11,6 +12,22 @@ from .notifications import _prep_notification
 from .operations import intg_filter
 from .methods import intg_list
 
+@app.callback(
+    Output('selected-data', 'children'),
+    Input('main-plot', 'selectedData'),
+    State("active-plot", "data"),
+)
+def display_selected_data(selected_data, actp):
+    an = 'a1' if actp == 1 else 'a2'
+    if an not in dbroot.adatas:
+        raise PreventUpdate
+    if 'adata' not in dbroot.adatas[an]:
+        raise PreventUpdate
+    # `reset_index()` turn the index into a column of the datafrane
+    selected_obs = dbroot.adatas[an]["adata"].obs.iloc[[p["customdata"][0] for p in selected_data["points"]]].reset_index() 
+    return dash.dash_table.DataTable(data=selected_obs.to_dict("records"),
+                                     columns=[{"id": c, "name": c} for c in selected_obs.columns],
+                                     style_table={'overflowX': 'auto'})
 
 @app.callback(
     Output("main-subset-list-signal", "data"),
