@@ -18,9 +18,10 @@ dbroot.adatas = BTrees.OOBTree.BTree()
 dbroot.MULTIPLEXER_OUTPUTS = BTrees.OOBTree.BTree()
 dbroot.notifications = BTrees.OOBTree.BTree()
 dbroot.palettes = BTrees.OOBTree.BTree()
-dbroot.palettes['main'] = PALETTE.copy()
-dbroot.palettes['co-analysis'] = PALETTE.copy()
-dbroot.palettes['side'] = PALETTE.copy()
+# Using the same palette for every plot right now
+# dbroot.palettes['main'] = PALETTE.copy()
+# dbroot.palettes['side'] = PALETTE.copy()
+dbroot.palettes["universal"] = PALETTE.copy()
 
 # Bootstrap theme
 external_stylesheets = [

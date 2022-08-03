@@ -6,7 +6,7 @@ from app import dbroot
 
 
 def get_plot_palette_popover(prefix):
-    palette = dbroot.palettes[prefix]
+    palette = dbroot.palettes["universal"]
     return dbc.Popover([
         dbc.PopoverHeader("Color Palette"),
         dbc.PopoverBody(
@@ -156,13 +156,7 @@ def get_plot_download_popover(prefix):
 
 
 def get_plot(prefix):
-    if prefix == 'main':
-        title = "Main Plot"
-    if prefix == 'co-analysis':
-        title = "Co-Analysis Plot"
-    if prefix == 'side':
-        title = 'Secondary Plot'
-
+    title = prefix.upper()
     plot = dbc.Card(
         [
             dbc.CardHeader(
@@ -256,12 +250,11 @@ def get_plot(prefix):
     return plot
 
 
-plots = dbc.Row(
+plots = html.Div(
     [
         dbc.Col(
             get_plot("main"),
             md=12, lg=12,
-            # md=6, lg=6,
             id="main-plot-col",
             className="block-display"
         ),
@@ -271,14 +264,8 @@ plots = dbc.Row(
             id="side-plot-col",
             className="no-display"
         ),
-        #dbc.Col(
-        #    get_plot("co-analysis"),
-        #    md=6, lg=6,
-        #    id="co-plot-col",
-        #    className="block-display"
-        #),
-        # html.Div(id='selected-data', style={'border': 'thin lightgrey solid', 'overflowX': 'scroll'})
         html.Div(id='selected-data')
     ],
     className="mb-5 g-0",
+    style={"display": "flex"}
 )
